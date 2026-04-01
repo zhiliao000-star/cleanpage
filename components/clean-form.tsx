@@ -7,7 +7,7 @@ import { cleanUrlAction, type FormState } from "@/app/actions";
 
 const samples = [
   "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API",
-  "https://en.wikipedia.org/wiki/Readability",
+  "https://en.wikipedia.org/wiki/Web_scraping",
   "https://nextjs.org/docs",
 ];
 
