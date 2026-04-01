@@ -10,7 +10,11 @@ function unauthorized() {
 
 async function runMigration() {
   await prisma.$executeRawUnsafe(`
-    CREATE TABLE IF NOT EXISTS "CleanPageEntry" (
+    DROP TABLE IF EXISTS "CleanPageEntry" CASCADE;
+  `);
+
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE "CleanPageEntry" (
       "id" SERIAL PRIMARY KEY,
       "publicId" TEXT NOT NULL,
       "sourceUrl" TEXT NOT NULL,
@@ -21,7 +25,7 @@ async function runMigration() {
   `);
 
   await prisma.$executeRawUnsafe(`
-    CREATE UNIQUE INDEX IF NOT EXISTS "CleanPageEntry_publicId_key"
+    CREATE UNIQUE INDEX "CleanPageEntry_publicId_key"
     ON "CleanPageEntry"("publicId");
   `);
 }
