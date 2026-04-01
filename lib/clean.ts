@@ -1,5 +1,4 @@
-import { Readability } from "@mozilla/readability";
-import { JSDOM } from "jsdom";
+import * as cheerio from "cheerio";
 import TurndownService from "turndown";
 
 import { prisma } from "@/lib/prisma";
@@ -27,6 +26,33 @@ export class CleanPageError extends Error {
   }
 }
 
+function extractContent(html: string, sourceUrl: string) {
+  const $ = cheerio.load(html);
+
+  const title =
+    $("meta[property='og:title']").attr("content")?.trim() ||
+    $("title").text().trim() ||
+    sourceUrl;
+
+  $(
+    "script,style,noscript,iframe,svg,canvas,form,nav,header,footer,aside,.sidebar,.advertisement,.ads,.cookie,.modal,.popup",
+  ).remove();
+
+  const articleHtml =
+    $("article").first().html() ||
+    $("main").first().html() ||
+    $("[role='main']").first().html() ||
+    $("body").html() ||
+    "";
+
+  const markdown = turndown.turndown(articleHtml).trim();
+
+  return {
+    title,
+    markdown,
+  };
+}
+
 export async function createCleanPageEntry(sourceUrl: string) {
   if (!isValidHttpUrl(sourceUrl)) {
     throw new CleanPageError("Please enter a valid http(s) URL.");
@@ -51,16 +77,7 @@ export async function createCleanPageEntry(sourceUrl: string) {
   }
 
   const html = await response.text();
-  const dom = new JSDOM(html, { url: sourceUrl });
-  const reader = new Readability(dom.window.document);
-  const article = reader.parse();
-
-  if (!article?.content) {
-    throw new CleanPageError("Could not extract readable content from that page.");
-  }
-
-  const markdown = turndown.turndown(article.content).trim();
-  const title = (article.title || dom.window.document.title || sourceUrl).trim();
+  const { title, markdown } = extractContent(html, sourceUrl);
 
   if (!markdown) {
     throw new CleanPageError("The extracted page was empty.");
