@@ -6,7 +6,7 @@ CleanPage is a small MVP that turns a noisy article URL into a clean, shareable 
 
 - Next.js 16 App Router + TypeScript
 - Tailwind CSS 4
-- Prisma + SQLite
+- Prisma + PostgreSQL
 - `cheerio` + `turndown` for extraction and Markdown conversion
 - `turndown` for Markdown conversion
 - Cloudflare Workers deployment via OpenNext
@@ -18,7 +18,7 @@ CleanPage is a small MVP that turns a noisy article URL into a clean, shareable 
 - Cryptographically strong 5-letter public IDs with collision retries
 - Saved cleaned pages at `/[id]`
 - Markdown rendering plus copy-markdown and copy-share-link buttons
-- SQLite persistence through Prisma
+- PostgreSQL persistence through Prisma
 - Cloudflare-ready config (`wrangler.toml` + `open-next.config.ts`)
 
 ## Local development
@@ -35,11 +35,11 @@ CleanPage is a small MVP that turns a noisy article URL into a clean, shareable 
    cp .env.example .env
    ```
 
-3. Generate Prisma client and create the SQLite database:
+3. Set a PostgreSQL `DATABASE_URL` in `.env`, then generate Prisma client and sync schema:
 
    ```bash
    npm run prisma:generate
-   npm run prisma:migrate
+   npx prisma db push
    ```
 
 4. Start the app:
@@ -57,7 +57,7 @@ CleanPage is a small MVP that turns a noisy article URL into a clean, shareable 
 - `npm run start` – run the built app locally
 - `npm run lint` – ESLint
 - `npm run prisma:generate` – generate Prisma client
-- `npm run prisma:migrate` – create/apply the local SQLite migration
+- `npm run prisma:migrate` – create/apply Prisma migration (for local DB workflows)
 - `npm run cf:build` – build for Cloudflare Workers using OpenNext
 - `npm run cf:preview` – preview the built worker locally with Wrangler
 - `npm run cf:deploy` – deploy to Cloudflare Workers
@@ -90,8 +90,8 @@ CleanPage is a small MVP that turns a noisy article URL into a clean, shareable 
 
 ### Notes
 
-- The default local database is `./dev.db`.
-- For production on Cloudflare, replace local SQLite with a durable remote database before real traffic.
+- Set `DATABASE_URL` to your hosted PostgreSQL connection string.
+- For Vercel, configure `DATABASE_URL` in Project Settings → Environment Variables.
 - No Vercel-specific files or instructions are included.
 
 ## Project structure
